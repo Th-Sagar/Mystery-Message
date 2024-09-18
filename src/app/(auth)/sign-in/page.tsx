@@ -1,28 +1,25 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { signInSchema } from "@/schemas/sigInSchema";
-import { signIn } from "next-auth/react";
 
-const page = () => {
-  const { toast } = useToast();
+export default function SignInForm() {
   const router = useRouter();
-
-  //zod implementation
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -32,6 +29,7 @@ const page = () => {
     },
   });
 
+  const { toast } = useToast();
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     const result = await signIn("credentials", {
       redirect: false,
@@ -40,7 +38,7 @@ const page = () => {
     });
 
     if (result?.error) {
-      if (result.error == "CredentialsSignin") {
+      if (result.error === "CredentialsSignin") {
         toast({
           title: "Login Failed",
           description: "Incorrect username or password",
@@ -56,7 +54,7 @@ const page = () => {
     }
 
     if (result?.url) {
-      router.replace(`/dashboard`);
+      router.replace("/dashboard");
     }
   };
 
@@ -69,56 +67,44 @@ const page = () => {
           </h1>
           <p className="mb-4">Sign in to continue your secret conversations</p>
         </div>
-
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="
-          space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
-              control={form.control}
               name="identifier"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email/Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Email/Username" {...field} />
-                  </FormControl>
+                  <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
-              control={form.control}
               name="password"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
-                  </FormControl>
+                  <Input type="password" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <Button type="submit">Signin</Button>
+            <Button className="w-full" type="submit">
+              Sign In
+            </Button>
           </form>
         </Form>
-
         <div className="text-center mt-4">
           <p>
-            Already a member?{" "}
-            <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
-              Sign in
+            Not a member yet?{" "}
+            <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
+              Sign up
             </Link>
           </p>
         </div>
       </div>
     </div>
   );
-};
-
-export default page;
+}

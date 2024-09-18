@@ -5,18 +5,7 @@ export interface Message extends Document {
   createdAt: Date;
 }
 
-export interface User extends Document {
-  username: string;
-  email: string;
-  password: string;
-  verifyCode: string;
-  verifyCodeExpiry: Date;
-  isAcceptingMessages: boolean;
-  isVerified: boolean;
-  messages: Message[];
-}
-
-const MessageSchema: Schema<Message> = new Schema({
+const MessageSchema: Schema<Message> = new mongoose.Schema({
   content: {
     type: String,
     required: true,
@@ -28,7 +17,19 @@ const MessageSchema: Schema<Message> = new Schema({
   },
 });
 
-const UserSchema: Schema<User> = new Schema({
+export interface User extends Document {
+  username: string;
+  email: string;
+  password: string;
+  verifyCode: string;
+  verifyCodeExpiry: Date;
+  isVerified: boolean;
+  isAcceptingMessages: boolean;
+  messages: Message[];
+}
+
+// Updated User schema
+const UserSchema: Schema<User> = new mongoose.Schema({
   username: {
     type: String,
     required: [true, "Username is required"],
@@ -47,11 +48,11 @@ const UserSchema: Schema<User> = new Schema({
   },
   verifyCode: {
     type: String,
-    required: [true, "Verify code is required"],
+    required: [true, "Verify Code is required"],
   },
   verifyCodeExpiry: {
     type: Date,
-    required: [true, "Verify code expiry is required"],
+    required: [true, "Verify Code Expiry is required"],
   },
   isVerified: {
     type: Boolean,

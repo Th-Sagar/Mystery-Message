@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -8,19 +9,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { verifySchema } from "@/schemas/verifySchema";
 import { ApiResponse } from "@/types/ApiResponse";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { verifySchema } from "@/schemas/verifySchema";
+import { useToast } from "@/hooks/use-toast";
 
-const VerifyAccount = () => {
+export default function VerifyAccount() {
   const router = useRouter();
   const params = useParams<{ username: string }>();
-
   const { toast } = useToast();
   const form = useForm<z.infer<typeof verifySchema>>({
     resolver: zodResolver(verifySchema),
@@ -28,12 +28,10 @@ const VerifyAccount = () => {
 
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
-      const response = await axios.post("/api/verify-code", {
+      const response = await axios.post<ApiResponse>(`/api/verify-code`, {
         username: params.username,
         code: data.code,
       });
-      console.log("The response data is ", response.data.message);
-      // const message = response.data.message;
 
       toast({
         title: "Success",
@@ -42,11 +40,12 @@ const VerifyAccount = () => {
 
       router.replace("/sign-in");
     } catch (error) {
-      console.error("Error in verify user", error);
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
-        title: "Verify Fail",
-        description: axiosError.response?.data.message,
+        title: "Verification Failed",
+        description:
+          axiosError.response?.data.message ??
+          "An error occurred. Please try again.",
         variant: "destructive",
       });
     }
@@ -80,6 +79,4 @@ const VerifyAccount = () => {
       </div>
     </div>
   );
-};
-
-export default VerifyAccount;
+}
